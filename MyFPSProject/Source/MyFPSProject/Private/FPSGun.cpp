@@ -21,6 +21,9 @@ AFPSGun::AFPSGun()
 	Zoomtime = 0.3f;
 	IsZoom = false;
 	Input=false;
+	//子弹数量
+	Ammo = 30;
+	MaxAmmo = 30;
 
 	//组件初始化
 	//盒体组件
@@ -67,8 +70,7 @@ void AFPSGun::BeginPlay()
 	GunBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AFPSGun::OnBeginOverLap);
 	//绑定重叠结束事件，关闭输入
 	GunBoxComponent->OnComponentEndOverlap.AddDynamic(this, &AFPSGun::OnEndOverLap);
-	//子弹数量
-	Ammo=30;
+
 }
 
 // Called every frame
@@ -199,6 +201,8 @@ void AFPSGun::OnBeginOverLap(UPrimitiveComponent* OverlappedComponent, AActor* O
 				this, &AFPSGun::AcquireController);
 			//记录导致重叠发生的角色
 			OverLapFPSCharacter= OverLapCharacter;
+			//根据角色是否带有弹药决定是否更新炮台弹药量
+			Ammo=(OverLapCharacter->HasAmmo)?MaxAmmo:Ammo;
 		}
 	}
 }

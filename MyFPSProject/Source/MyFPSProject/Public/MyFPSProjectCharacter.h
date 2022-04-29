@@ -52,6 +52,9 @@ public:
 	float ConsumeEnergyOfRun;
 	//当前速度
 	float Speed;
+	//表示玩家身上是否带有弹药
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	bool HasAmmo;
 	
 
 protected:

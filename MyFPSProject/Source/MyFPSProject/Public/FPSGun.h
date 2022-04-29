@@ -66,6 +66,9 @@ public:
 	//子弹数量
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Ammo;
+	//最大子弹数量
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaxAmmo;
 
 protected:
 	//记录与FPSGun发生碰撞的角色，用于将角色切换回去

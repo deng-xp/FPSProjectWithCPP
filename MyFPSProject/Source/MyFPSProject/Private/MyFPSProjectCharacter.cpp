@@ -30,6 +30,7 @@ AMyFPSProjectCharacter::AMyFPSProjectCharacter()
 	WalkSpeed = 600.0f;
 	MaxSpeed = 1200.0f;
 	Speed = WalkSpeed;
+	HasAmmo=false;
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;

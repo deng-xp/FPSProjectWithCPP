@@ -24,6 +24,7 @@ protected:
 	//生成Actor的类型
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AFPSNPC> ActorClassBeSpawned;
+	
 	//计时器句柄
 	FTimerHandle SpawnActorTimeHandle;
 
