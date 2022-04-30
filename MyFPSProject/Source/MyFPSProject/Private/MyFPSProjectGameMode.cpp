@@ -18,6 +18,7 @@ AMyFPSProjectGameMode::AMyFPSProjectGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	IsMissionAccomplished=true;
 }
 
 void AMyFPSProjectGameMode::BeginPlay()
@@ -25,9 +26,37 @@ void AMyFPSProjectGameMode::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMyFPSProjectGameMode::GameOver()
+void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 {
 	UE_LOG(LogTemp,Warning,TEXT("Game over"));
+	if (MyPawn)
+	{
+		//关闭输入
+		MyPawn->DisableInput(nullptr);
+
+		if (ViewActorClass)
+		{
+			/*切换视角*/
+			//寻找世界中所有的可选类实例
+			TArray<AActor*> ViewActor;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ViewActorClass, ViewActor);
+			AActor* AimViewActor = nullptr;
+			if (ViewActor.Num() != 0)
+			{
+				AimViewActor = ViewActor[0];
+				APlayerController* MyController = Cast<APlayerController>(MyPawn->GetController());
+				if (MyController)
+				{
+					MyController->SetViewTargetWithBlend(AimViewActor, 1.0, EViewTargetBlendFunction::VTBlend_Cubic);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp,Warning,TEXT("GameMode's ViewActorClass is nullptr!"));
+		}
+		MissionAcomplished();
+	}
 	
 }
 

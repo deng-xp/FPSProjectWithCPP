@@ -85,8 +85,6 @@ void AMyFPSProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyFPSProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMyFPSProjectCharacter::MoveRight);
 
-
-
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
@@ -176,13 +174,13 @@ void AMyFPSProjectCharacter::OnHealthChange()
 	if (Health == 0 && !IsDied)
 	{
 		IsDied=true;
-		//禁用输入
-		this->DisableInput(UGameplayStatics::GetPlayerController(GetWorld(),0));
+
 		//调用Gamemode的游戏结束函数
 		AMyFPSProjectGameMode* CurGameMode=Cast<AMyFPSProjectGameMode,AGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		CurGameMode->GameOver();
+		CurGameMode->IsMissionAccomplished=false;
+		CurGameMode->GameOver(this);
 		
-		Destroy();
+		InitialLifeSpan=5.0f;
 	}
 }
 
