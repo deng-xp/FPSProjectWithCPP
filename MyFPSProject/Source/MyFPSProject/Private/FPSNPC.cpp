@@ -4,6 +4,7 @@
 #include "FPSNPC.h"
 #include "Components/BoxComponent.h"
 #include "FPSProjectile.h"
+#include "MyFPSProjectCharacter.h"
 #include "kismet/GameplayStatics.h"
 
 // Sets default values
@@ -75,6 +76,7 @@ void AFPSNPC::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 	if (OtherActor != this)
 	{
 		AFPSProjectile* HitProjectile=Cast<AFPSProjectile,AActor>(OtherActor);
+		AMyFPSProjectCharacter* HitCharacter= Cast<AMyFPSProjectCharacter, AActor>(OtherActor);
 		if (HitProjectile != nullptr)
 		{
 			//this->FPSNPCMeshComponent->SetMaterial(0, FPSNPCMaterial);
@@ -83,6 +85,12 @@ void AFPSNPC::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 			{
 				Destroy();
 			}
+		}
+		else if (HitCharacter != nullptr)
+		{
+			HitCharacter->Health-=0.1;
+			HitCharacter->Health=FMath::Clamp(HitCharacter->Health,0.0f,1.0f);
+			Destroy();
 		}
 	}
 }
