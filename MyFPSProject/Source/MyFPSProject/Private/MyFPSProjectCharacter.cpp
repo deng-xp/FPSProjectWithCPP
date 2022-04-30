@@ -10,6 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "FPSGun.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MyFPSProjectGameMode.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AMyFPSProjectCharacter
@@ -31,6 +32,7 @@ AMyFPSProjectCharacter::AMyFPSProjectCharacter()
 	MaxSpeed = 1200.0f;
 	Speed = WalkSpeed;
 	HasAmmo=false;
+	IsDied=false;
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -169,6 +171,22 @@ void AMyFPSProjectCharacter::MoveForward(float Value)
 	}
 }
 
+void AMyFPSProjectCharacter::OnHealthChange()
+{
+	if (Health == 0 && !IsDied)
+	{
+		IsDied=true;
+		//禁用输入
+		this->DisableInput(UGameplayStatics::GetPlayerController(GetWorld(),0));
+		//调用Gamemode的游戏结束函数
+		AMyFPSProjectGameMode* CurGameMode=Cast<AMyFPSProjectGameMode,AGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+		CurGameMode->GameOver();
+		
+		Destroy();
+	}
+}
+
+
 void AMyFPSProjectCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
@@ -195,7 +213,6 @@ void AMyFPSProjectCharacter::LookUpAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
-
 
 void AMyFPSProjectCharacter::OnResetVR()
 {

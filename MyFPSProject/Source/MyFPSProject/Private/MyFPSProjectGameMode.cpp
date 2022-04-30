@@ -10,7 +10,7 @@
 
 AMyFPSProjectGameMode::AMyFPSProjectGameMode()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	// set default pawn class to our Blueprinted character  
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
 	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/BP_FPSGun"));
@@ -18,7 +18,6 @@ AMyFPSProjectGameMode::AMyFPSProjectGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-	
 }
 
 void AMyFPSProjectGameMode::BeginPlay()
@@ -26,4 +25,9 @@ void AMyFPSProjectGameMode::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AMyFPSProjectGameMode::GameOver()
+{
+	UE_LOG(LogTemp,Warning,TEXT("Game over"));
+	
+}
 

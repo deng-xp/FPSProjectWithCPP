@@ -10,6 +10,7 @@
 #include "MyFPSProjectCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/TextRenderComponent.h"
 
 // Sets default values
 AFPSGun::AFPSGun()
@@ -60,6 +61,12 @@ AFPSGun::AFPSGun()
 	GunMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunMesh"));
 	check(GunMesh != nullptr);
 	GunMesh->SetupAttachment(RootComponent);
+
+	//文本组件
+	AmmoText=CreateDefaultSubobject<UTextRenderComponent>(TEXT("AmmoText"));
+	AmmoText->SetHorizontalAlignment(EHTA_Center);
+	AmmoText->SetWorldSize(50.0f);
+	AmmoText->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -124,10 +131,12 @@ void AFPSGun::Fire()
 {
 	if (Ammo <= 0)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Red, TEXT("Please replenish your ammunition"),false,FVector2D(1.5,1.5));
+		//GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Red, TEXT("Please replenish your ammunition"),false,FVector2D(1.5,1.5));
+		AmmoText->SetText(TEXT("Please replenish your ammunition"));
+		GetWorldTimerManager().SetTimer(TextTimerHandle,this,&AFPSGun::ClearText,2.0f,true);
 		return;
 	}
-	if (ProjectileClass)
+	else if (ProjectileClass)
 	{
 		//获取相机的变换
 		FVector CameraLocation=GunCameraComponent->GetComponentLocation();
@@ -229,4 +238,10 @@ void AFPSGun::AcquireController()
 		DisplayUI();
 		MyController->Possess(this);
 	}
+}
+
+void AFPSGun::ClearText()
+{
+	//文本消息重置
+	AmmoText->SetText(TEXT(""));
 }

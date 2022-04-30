@@ -90,6 +90,7 @@ void AFPSNPC::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 		{
 			HitCharacter->Health-=0.1;
 			HitCharacter->Health=FMath::Clamp(HitCharacter->Health,0.0f,1.0f);
+			HitCharacter->OnHealthChange();
 			Destroy();
 		}
 	}

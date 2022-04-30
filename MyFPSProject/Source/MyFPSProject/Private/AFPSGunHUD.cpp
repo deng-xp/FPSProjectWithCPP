@@ -7,5 +7,5 @@ void AAFPSGunHUD::DrawHUD()
 {
 	Super::DrawHUD();
 	//Êä³öÎÄ×Ö
-	DrawText(StringPrintOnScreen,FColor::Red, Canvas->ClipX * 0.5f- 150, Canvas->ClipY * 0.5f-100);
+	DrawText(TEXT("You Died"),FColor::Red, Canvas->ClipX * 0.5f- 150, Canvas->ClipY * 0.5f-100);
 }

@@ -18,8 +18,7 @@ class MYFPSPROJECT_API AAFPSGunHUD : public AHUD
 public:
 	//HUD绘制的主要调用，进行重写
 	virtual void DrawHUD() override;
-	//用于显示的字符
-	FString StringPrintOnScreen;
+
 protected:
 
 };

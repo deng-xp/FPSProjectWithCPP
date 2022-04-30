@@ -10,6 +10,7 @@ class UCameraComponent;
 class UBoxComponent;
 class USpringArmComponent;
 class AMyFPSProjectCharacter;
+class UTextRenderComponent;
 UCLASS()
 class MYFPSPROJECT_API AFPSGun : public APawn
 {
@@ -49,6 +50,9 @@ public:
 	//声音组件（开炮时的炮声）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* FireSound;
+	//文本组件，显示弹药不足时的提示信息
+	UPROPERTY(VisibleAnywhere)
+	UTextRenderComponent* AmmoText;
 
 	//输入变量
 	//记录视角旋转角度
@@ -69,6 +73,8 @@ public:
 	//最大子弹数量
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxAmmo;
+	//定时器句柄
+	FTimerHandle TextTimerHandle;
 
 protected:
 	//记录与FPSGun发生碰撞的角色，用于将角色切换回去
@@ -101,5 +107,7 @@ protected:
 	//关闭UI
 	UFUNCTION(BlueprintImplementableEvent)
 	void CloseUI();
+	//文本内容置为空
+	void ClearText();
 
 };

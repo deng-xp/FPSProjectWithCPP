@@ -56,6 +56,8 @@ public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
 	bool HasAmmo;
 	
+	//玩家是否死亡
+	bool IsDied;
 
 protected:
 
@@ -71,7 +73,6 @@ protected:
 	void Run();
 	/*停止加速跑*/
 	void StopRun();
-
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -106,6 +107,8 @@ protected:
 	// End of APawn interface
 
 public:
+	/*玩家Health状态改变时执行*/
+	void OnHealthChange();
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
