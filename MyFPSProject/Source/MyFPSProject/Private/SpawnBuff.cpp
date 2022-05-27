@@ -35,7 +35,6 @@ void ASpawnBuff::BeginPlay()
 void ASpawnBuff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ASpawnBuff::StartSpawnBuff()

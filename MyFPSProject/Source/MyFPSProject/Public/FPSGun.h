@@ -19,6 +19,8 @@ class MYFPSPROJECT_API AFPSGun : public APawn
 public:
 	// Sets default values for this pawn's properties
 	AFPSGun();
+	//属性复制
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -67,14 +69,15 @@ public:
 	FVector MuzzleOffset;
 	//标记是否读取输入
 	bool Input;
-	//子弹数量
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//子弹数量(需同步)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int Ammo;
 	//最大子弹数量
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxAmmo;
 	//定时器句柄
 	FTimerHandle TextTimerHandle;
+
 
 protected:
 	//记录与FPSGun发生碰撞的角色，用于将角色切换回去
@@ -83,8 +86,11 @@ protected:
 
 protected:
 	//发射物发射函数，与Fire输入绑定
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	void Fire();
+
+	UFUNCTION()
+	void StartFire();
 	//摄像机上下转动
 	void PitchCamera(float AxisValue);
 	//摄像机左右转动

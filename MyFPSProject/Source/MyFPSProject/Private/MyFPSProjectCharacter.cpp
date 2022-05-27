@@ -184,6 +184,28 @@ void AMyFPSProjectCharacter::OnHealthChange()
 	}
 }
 
+void AMyFPSProjectCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//要复制的变量
+	DOREPLIFETIME(AMyFPSProjectCharacter, Health);
+	DOREPLIFETIME(AMyFPSProjectCharacter, Energy);
+}
+
+
+void AMyFPSProjectCharacter::OnRep_Health()
+{
+	OnHealthChange();
+}
+
+void AMyFPSProjectCharacter::SetHealth(float Damage)
+{
+	Health+=Damage;
+	Health = FMath::Clamp(Health, 0.0f, 1.0f);
+	OnHealthChange();
+}
+
 
 void AMyFPSProjectCharacter::MoveRight(float Value)
 {

@@ -9,6 +9,9 @@ AFPSProjectile::AFPSProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//设置为需复制
+	bReplicates=true;
 	
 	//初始化碰撞组件
 	CollisionComponent=CreateDefaultSubobject<USphereComponent>(TEXT("Projectile"));

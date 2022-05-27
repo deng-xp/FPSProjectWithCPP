@@ -2,6 +2,7 @@
 
 
 #include "FPSNPC.h"
+#include "FPSGun.h"
 #include "Components/BoxComponent.h"
 #include "FPSProjectile.h"
 #include "MyFPSProjectCharacter.h"
@@ -13,6 +14,9 @@ AFPSNPC::AFPSNPC()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
+	//启用复制
+	bReplicates=true;
+
 	//设置碰撞
 	FPSNPCBox = CreateDefaultSubobject<UBoxComponent>(TEXT("FPSNPCBox"));
 	FPSNPCBox->SetBoxExtent(FVector(60.0f));
@@ -52,22 +56,28 @@ void AFPSNPC::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//APlayerController* CurControl=UGameplayStatics::GetPlayerController(GetWorld(),0);
-	APawn* CurPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (CurPawn)
-	{
-		FVector FinalLocation = CurPawn->GetActorLocation();
+
+		//FVector FinalLocation = CurPawn->GetActorLocation();
+		FVector FinalLocation = FVector(-1026,0,290);
 		FVector NewLocation = this->GetActorLocation();
 		FRotator NewRotation = (FinalLocation - NewLocation).Rotation();
 		NewRotation.Pitch=0.0f;
 		FVector2D MoveDirection = FVector2D((FinalLocation.X - NewLocation.X), (FinalLocation.Y - NewLocation.Y));
 
+		//在炮台一定范围内后销毁
+		if (MoveDirection.Size() < 5)
+		{
+			Destroy();
+		}
+
 		MoveDirection = MoveDirection / MoveDirection.Size();
 		MoveDirection = Speed * DeltaTime * MoveDirection;
 		FVector DeltaLocation = FVector(MoveDirection.X, MoveDirection.Y, 0);
+
 		NewLocation += DeltaLocation;
 		//UE_LOG(LogTemp, Warning, TEXT("%f,%f,%f"), NewLocation.X, NewLocation.Y, NewLocation.Z);
 		SetActorLocationAndRotation(NewLocation,NewRotation);
-	}
+
 }
 
 void AFPSNPC::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -88,9 +98,7 @@ void AFPSNPC::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 		}
 		else if (HitCharacter != nullptr)
 		{
-			HitCharacter->Health-=0.1;
-			HitCharacter->Health=FMath::Clamp(HitCharacter->Health,0.0f,1.0f);
-			HitCharacter->OnHealthChange();
+			HitCharacter->SetHealth(-0.1);
 			Destroy();
 		}
 	}

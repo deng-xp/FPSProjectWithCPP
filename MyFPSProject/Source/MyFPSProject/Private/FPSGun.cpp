@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "FPSGun.h"
 #include "EngineUtils.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +9,7 @@
 #include "MyFPSProjectCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Components/TextRenderComponent.h"
 
 // Sets default values
@@ -17,6 +17,9 @@ AFPSGun::AFPSGun()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//启用复制
+	bReplicates = true;
 
 	//参数初始化
 	Zoomtime = 0.3f;
@@ -67,6 +70,7 @@ AFPSGun::AFPSGun()
 	AmmoText->SetHorizontalAlignment(EHTA_Center);
 	AmmoText->SetWorldSize(50.0f);
 	AmmoText->SetupAttachment(RootComponent);
+
 }
 
 // Called when the game starts or when spawned
@@ -77,7 +81,6 @@ void AFPSGun::BeginPlay()
 	GunBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AFPSGun::OnBeginOverLap);
 	//绑定重叠结束事件，关闭输入
 	GunBoxComponent->OnComponentEndOverlap.AddDynamic(this, &AFPSGun::OnEndOverLap);
-
 }
 
 // Called every frame
@@ -118,7 +121,7 @@ void AFPSGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	//绑定Fire输入
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSGun::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSGun::StartFire);
 	//镜头旋转
 	PlayerInputComponent->BindAxis("Turn", this, &AFPSGun::YawCamera);
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPSGun::PitchCamera);
@@ -127,7 +130,7 @@ void AFPSGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &AFPSGun::ZoomOut);
 }
 //发射物发射
-void AFPSGun::Fire()
+void AFPSGun::Fire_Implementation()
 {
 	if (Ammo <= 0)
 	{
@@ -174,6 +177,10 @@ void AFPSGun::Fire()
 		}
 	}
 }
+void AFPSGun::StartFire()
+{
+	Fire_Implementation();
+}
 //摄像机上下转动
 void AFPSGun::PitchCamera(float AxisValue)
 {
@@ -202,16 +209,35 @@ void AFPSGun::OnBeginOverLap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	UE_LOG(LogTemp, Warning, TEXT("Gun Begin Overlap"));
 	if (OtherActor != this)
 	{
-		AMyFPSProjectCharacter* OverLapCharacter=Cast<AMyFPSProjectCharacter,AActor>(OtherActor);
+		AMyFPSProjectCharacter* OverLapCharacter = Cast<AMyFPSProjectCharacter, AActor>(OtherActor);
+		APawn* Mypawn=Cast<APawn>(OtherActor);
+
 		if (OverLapCharacter != nullptr)
 		{
+			APlayerController* CurCharacterController=Cast<APlayerController>(Mypawn->Controller);
+			
 			//检测玩家控制器的输入(绑定控制Pawn切换的输入）
-			UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputComponent->BindAction("Interaction", IE_Pressed,
-				this, &AFPSGun::AcquireController);
-			//记录导致重叠发生的角色
-			OverLapFPSCharacter= OverLapCharacter;
-			//根据角色是否带有弹药决定是否更新炮台弹药量
-			Ammo=(OverLapCharacter->HasAmmo)?MaxAmmo:Ammo;
+			//UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputComponent->BindAction("Interaction", IE_Pressed,
+			//	this, &AFPSGun::AcquireController);
+			if (CurCharacterController == nullptr)
+			{
+				UE_LOG(LogTemp,Warning,TEXT("Controller wrong"));
+			}
+			else
+			{
+				if (CurCharacterController->InputComponent == nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("wrong1"));
+				}
+				else
+				{
+					CurCharacterController->InputComponent->BindAction("Interaction", IE_Pressed, this, &AFPSGun::AcquireController);
+					//记录导致重叠发生的角色
+					OverLapFPSCharacter = OverLapCharacter;
+					//根据角色是否带有弹药决定是否更新炮台弹药量
+					Ammo = (OverLapCharacter->HasAmmo) ? MaxAmmo : Ammo;
+				}
+			}
 		}
 	}
 }
@@ -225,8 +251,9 @@ void AFPSGun::OnEndOverLap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 void AFPSGun::AcquireController()
 {
-	APlayerController* MyController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	
+	//APlayerController* MyController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	APlayerController* MyController = Cast<APlayerController>(OverLapFPSCharacter->GetController());
+	//MyController->Possess(this);
 	//实现两个Pawn之间的来回切换
 	if (UGameplayStatics::GetPlayerPawn(GetWorld(), 0) == this)
 	{
@@ -244,4 +271,12 @@ void AFPSGun::ClearText()
 {
 	//文本消息重置
 	AmmoText->SetText(TEXT(""));
+}
+
+void AFPSGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//要复制的属性
+	DOREPLIFETIME(AFPSGun,Ammo);
 }

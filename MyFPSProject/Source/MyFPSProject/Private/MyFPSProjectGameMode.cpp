@@ -33,7 +33,6 @@ void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 	{
 		//πÿ±’ ‰»Î
 		MyPawn->DisableInput(nullptr);
-		
 		if (ViewActorClass)
 		{
 			/*«–ªª ”Ω«*/
@@ -57,6 +56,5 @@ void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 		}
 		MissionAcomplished();
 	}
-	
 }
 

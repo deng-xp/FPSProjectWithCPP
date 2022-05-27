@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/Engine.h"
 #include "MyFPSProjectCharacter.generated.h"
+
 
 UCLASS(config=Game)
 class AMyFPSProjectCharacter : public ACharacter
@@ -30,10 +33,10 @@ public:
 	float BaseLookUpRate;
 
 	//生命值
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,ReplicatedUsing=OnRep_Health)
 	float Health;
 	//能量值
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Replicated)
 	float Energy;
 	//每秒自动回复的能量值
 	UPROPERTY(EditAnywhere)
@@ -60,6 +63,13 @@ public:
 	bool IsDied;
 
 protected:
+
+	/**Health复制更新前调用的函数**/
+	UFUNCTION()
+	void OnRep_Health();
+
+	/*属性复制*/
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/*重新定义跳跃事件，方便对Energy进行处理*/
 	void StartJump();
@@ -109,9 +119,16 @@ protected:
 public:
 	/*玩家Health状态改变时执行*/
 	void OnHealthChange();
+	/**Health设置、获取相关的函数**/
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void SetHealth(float Damage);
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetCurHealth() const { return Health; };
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 };
 
