@@ -5,6 +5,7 @@
 #include "FPSNPC.h"
 #include "kismet/GameplayStatics.h"
 #include "FPSGun.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 ASpawnActor::ASpawnActor()
@@ -21,12 +22,15 @@ ASpawnActor::ASpawnActor()
 void ASpawnActor::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(SpawnActorTimeHandle, this, &ASpawnActor::SpawnNPC, DeltaTimeOfSpawnActor, true);
+	if (HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(SpawnActorTimeHandle, this, &ASpawnActor::SpawnNPC, DeltaTimeOfSpawnActor, true);
+	}
 }
 
 void ASpawnActor::SpawnNPC()
 {
-	UWorld* CurWorld = GetWorld();
+	UWorld* CurWorld=GetWorld();
 	FVector Location = GetActorLocation();
 	FRotator Rotation = GetActorRotation();
 
@@ -36,19 +40,17 @@ void ASpawnActor::SpawnNPC()
 	Location.X+=randx;
 	Location.Y+=randy;
 
-	APawn* CurPawn = UGameplayStatics::GetPlayerPawn(CurWorld, 0);
-	AFPSGun* CurGun = Cast<AFPSGun, APawn>(CurPawn);
+	//APawn* CurPawn = UGameplayStatics::GetPlayerPawn(CurWorld, 0);
+	//AFPSGun* CurGun = Cast<AFPSGun, APawn>(CurPawn);
 
 	//只有在控制对象为炮台时生成NPC
-	if (CurWorld && CurGun != nullptr)
-	{
+	//if (CurWorld && CurGun != nullptr)
+	//{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = GetInstigator();
-
 		AFPSNPC* NPC = CurWorld->SpawnActor<AFPSNPC>(ActorClassBeSpawned, Location, Rotation, SpawnParams);
-	}
-
+	//}
 }
 // Called every frame
 void ASpawnActor::Tick(float DeltaTime)

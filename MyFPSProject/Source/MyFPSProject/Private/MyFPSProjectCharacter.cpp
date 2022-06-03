@@ -206,6 +206,21 @@ void AMyFPSProjectCharacter::SetHealth(float Damage)
 	OnHealthChange();
 }
 
+void AMyFPSProjectCharacter::OnBeginOverlapWithTestBox_Implementation()
+{
+	UWorld* CurWorld=GetWorld();
+	if(FireParticle)
+	{ 
+		UGameplayStatics::SpawnEmitterAtLocation(CurWorld, FireParticle, this->GetActorLocation());
+	}
+}
+
+/*void AMyFPSProjectCharacter::OnBeginOverlapGun_Implementation(APlayerController* CurPlayerController)
+{
+	APlayerController* CurController=Cast<APlayerController>(GetController());
+	CurPlayerController= CurController;
+}*/
+
 
 void AMyFPSProjectCharacter::MoveRight(float Value)
 {

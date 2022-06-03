@@ -59,6 +59,20 @@ public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
 	bool HasAmmo;
 	
+	//碰撞到炮台后进行调用，切换控制器
+	//UFUNCTION(Client,Reliable)
+	//void OnBeginOverlapGun(class APlayerController* CurPlayerController);
+
+
+	/*测试RPC使用的函数、成员组件*/
+	//碰撞到"TestBox"后调用的RPC_Implementation
+	UFUNCTION(Client,Reliable)
+	void OnBeginOverlapWithTestBox();
+	//粒子,测试RPC调用
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem* FireParticle;
+	
+
 	//玩家是否死亡
 	bool IsDied;
 

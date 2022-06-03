@@ -43,6 +43,14 @@ AFPSNPC::AFPSNPC()
 	NumberOfHit=3;
 }
 
+void AFPSNPC::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//要复制的变量
+	DOREPLIFETIME(AFPSNPC, NumberOfHit);
+}
+
 // Called when the game starts or when spawned
 void AFPSNPC::BeginPlay()
 {

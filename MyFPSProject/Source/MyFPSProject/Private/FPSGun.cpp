@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "FPSPlayerController.h"
 #include "Components/TextRenderComponent.h"
 
 // Sets default values
@@ -209,35 +210,37 @@ void AFPSGun::OnBeginOverLap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	UE_LOG(LogTemp, Warning, TEXT("Gun Begin Overlap"));
 	if (OtherActor != this)
 	{
-		AMyFPSProjectCharacter* OverLapCharacter = Cast<AMyFPSProjectCharacter, AActor>(OtherActor);
-		APawn* Mypawn=Cast<APawn>(OtherActor);
-
+		AMyFPSProjectCharacter* OverLapCharacter = Cast<AMyFPSProjectCharacter>(OtherActor);
+		AFPSPlayerController* CurCharacterController=nullptr;
 		if (OverLapCharacter != nullptr)
 		{
-			APlayerController* CurCharacterController=Cast<APlayerController>(Mypawn->Controller);
-			
-			//检测玩家控制器的输入(绑定控制Pawn切换的输入）
-			//UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputComponent->BindAction("Interaction", IE_Pressed,
-			//	this, &AFPSGun::AcquireController);
-			if (CurCharacterController == nullptr)
+			CurCharacterController = Cast<AFPSPlayerController>(OverLapCharacter->GetController());
+			CurControllerOfGun = (CurCharacterController);
+			if (OverLapCharacter->GetLocalRole()==ROLE_Authority&&CurCharacterController)
 			{
-				UE_LOG(LogTemp,Warning,TEXT("Controller wrong"));
-			}
-			else
-			{
-				if (CurCharacterController->InputComponent == nullptr)
+				FString curname = CurCharacterController->GetName();
+				UE_LOG(LogTemp,Warning,TEXT("The current controller's name is %s"),*curname);
+
+				//此处绑定映射：监听服务器模式下，有客户端充当服务器
+				if (CurCharacterController->InputComponent != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("wrong1"));
-				}
-				else
-				{
+					UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,Server"));
 					CurCharacterController->InputComponent->BindAction("Interaction", IE_Pressed, this, &AFPSGun::AcquireController);
-					//记录导致重叠发生的角色
-					OverLapFPSCharacter = OverLapCharacter;
-					//根据角色是否带有弹药决定是否更新炮台弹药量
-					Ammo = (OverLapCharacter->HasAmmo) ? MaxAmmo : Ammo;
 				}
 			}
+			if (OverLapCharacter->GetLocalRole() == ROLE_AutonomousProxy)
+			{
+				//在客户端绑定输入映射
+				if (CurCharacterController->InputComponent != nullptr)
+				{
+					UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,client"));
+					CurCharacterController->InputComponent->BindAction("Interaction", IE_Pressed, this, &AFPSGun::AcquireController);
+				}
+			}
+			//记录导致重叠发生的角色
+			OverLapFPSCharacter = OverLapCharacter;
+			//根据角色是否带有弹药决定是否更新炮台弹药量
+			Ammo = (OverLapCharacter->HasAmmo) ? MaxAmmo : Ammo;
 		}
 	}
 }
@@ -246,24 +249,36 @@ void AFPSGun::OnEndOverLap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	UE_LOG(LogTemp, Warning, TEXT("Gun end Overlap"));
 	//解除绑定 控制Pawn切换的输入
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputComponent->RemoveActionBinding("Interaction",IE_Pressed);
+	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputComponent->RemoveActionBinding("Interaction",IE_Pressed);
+	if (OverLapFPSCharacter->GetLocalRole() == ROLE_AutonomousProxy||(OverLapFPSCharacter->GetLocalRole() == ROLE_AutonomousProxy && CurControllerOfGun->
+		InputComponent != nullptr))
+	{
+		CurControllerOfGun->InputComponent->RemoveActionBinding("Interaction", IE_Pressed);
+	}
 }
 
 void AFPSGun::AcquireController()
 {
-	//APlayerController* MyController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	APlayerController* MyController = Cast<APlayerController>(OverLapFPSCharacter->GetController());
-	//MyController->Possess(this);
-	//实现两个Pawn之间的来回切换
-	if (UGameplayStatics::GetPlayerPawn(GetWorld(), 0) == this)
+	UE_LOG(LogTemp,Warning,TEXT("F bind"));
+	AFPSPlayerController* MyController = CurControllerOfGun;
+	//在服务器执行，客户端调用
+	if (MyController->GetLocalRole()==ROLE_AutonomousProxy|| MyController->GetLocalRole() == ROLE_Authority)
 	{
-		CloseUI();
-		MyController->Possess(OverLapFPSCharacter);
-	}
-	else
-	{
-		DisplayUI();
-		MyController->Possess(this);
+		if (MyController->GetPawn() != this)
+		{
+			DisplayUI();
+			//通过控制器中的RPC函数实现角色切换
+			MyController->ChangePawn(this);
+			FString nameofcontroller = MyController->GetName();
+			UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is %s"), *nameofcontroller);
+		}
+		else
+		{
+			CloseUI();
+			MyController->ChangePawn(OverLapFPSCharacter);
+			FString nameofcontroller = MyController->GetName();
+			UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is %s"), *nameofcontroller);
+		}
 	}
 }
 

@@ -83,6 +83,9 @@ protected:
 	//记录与FPSGun发生碰撞的角色，用于将角色切换回去
 	UPROPERTY()
 	AMyFPSProjectCharacter* OverLapFPSCharacter;
+	//记录当前控制器
+	UPROPERTY()
+	class AFPSPlayerController* CurControllerOfGun;
 
 protected:
 	//发射物发射函数，与Fire输入绑定

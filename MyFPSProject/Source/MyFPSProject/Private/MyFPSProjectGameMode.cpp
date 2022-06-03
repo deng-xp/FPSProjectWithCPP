@@ -8,6 +8,7 @@
 #include "kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
+
 AMyFPSProjectGameMode::AMyFPSProjectGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
