@@ -16,14 +16,20 @@ public:
 	ATestBox();
 
 protected:
+	UPROPERTY(ReplicatedUsing = OnRep_testparam)
+	bool testparam;
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
 	class UBoxComponent* CollisionBoxComponent;
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
 	class UTextRenderComponent* TextComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UTextRenderComponent* TextComponent2;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
 	void OnBeginOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
@@ -32,5 +38,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnRep_testparam();
 
 };

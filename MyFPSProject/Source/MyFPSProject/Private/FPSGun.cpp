@@ -89,31 +89,40 @@ void AFPSGun::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/***************视角调整相关**************/
-	//旋转Actor：由于摄像机与Actor相互绑定，因此Actor转动，Camera也会动
-	FRotator NewRotation = GetActorRotation();
-	NewRotation.Pitch += CameraInput.Y;
-	//设置旋转角度在一定范围内
-	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -80.0f, 80.f);
-	SetActorRotation(NewRotation);
-	NewRotation.Yaw += CameraInput.X;
-	NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw, -75.0f, 75.0f);
-	SetActorRotation(NewRotation);
-
-	/*****************开镜相关*****************/
-	//获取摄像机视野角度（开镜角度为30°，正常为90°）
-	float CurView = GunCameraComponent->FieldOfView;
-	if (IsZoom && CurView > 30.0f)
+	if (!IsLocallyControlled())
 	{
-		CurView -= (60.0 / Zoomtime) * DeltaTime;
-		CurView=FMath::Clamp(CurView,30.0f,90.0f);
-		GunCameraComponent->SetFieldOfView(CurView);
+		FRotator NewRot=GunCameraComponent->GetRelativeRotation();
+		NewRot.Pitch=RemoteViewPitch*360.0f/255.0f;
+		SetActorRotation(NewRot);
 	}
-	else if (!IsZoom && CurView < 90.0f)
+
+	if (IsLocallyControlled())
 	{
-		CurView += (60.0 / Zoomtime) * DeltaTime;
-		CurView = FMath::Clamp(CurView, 30.0f, 90.0f);
-		GunCameraComponent->SetFieldOfView(CurView);
+		/***************视角调整相关**************/
+		//旋转Actor：由于摄像机与Actor相互绑定，因此Actor转动，Camera也会动
+		FRotator NewRotation = GetActorRotation();
+		NewRotation.Pitch += CameraInput.Y;
+		//设置旋转角度在一定范围内
+		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -80.0f, 80.f);
+		SetActorRotation(NewRotation);
+		NewRotation.Yaw += CameraInput.X;
+		NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw, -75.0f, 75.0f);
+		SetActorRotation(NewRotation);
+		/*****************开镜相关*****************/
+		//获取摄像机视野角度（开镜角度为30°，正常为90°）
+		float CurView = GunCameraComponent->FieldOfView;
+		if (IsZoom && CurView > 30.0f)
+		{
+			CurView -= (60.0 / Zoomtime) * DeltaTime;
+			CurView = FMath::Clamp(CurView, 30.0f, 90.0f);
+			GunCameraComponent->SetFieldOfView(CurView);
+		}
+		else if (!IsZoom && CurView < 90.0f)
+		{
+			CurView += (60.0 / Zoomtime) * DeltaTime;
+			CurView = FMath::Clamp(CurView, 30.0f, 90.0f);
+			GunCameraComponent->SetFieldOfView(CurView);
+		}
 	}
 }
 
@@ -221,10 +230,10 @@ void AFPSGun::OnBeginOverLap(UPrimitiveComponent* OverlappedComponent, AActor* O
 				FString curname = CurCharacterController->GetName();
 				UE_LOG(LogTemp,Warning,TEXT("The current controller's name is %s"),*curname);
 
-				//此处绑定映射：监听服务器模式下，有客户端充当服务器
+				
 				if (CurCharacterController->InputComponent != nullptr)
 				{
-					UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,Server"));
+					//UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,Server"));
 					CurCharacterController->InputComponent->BindAction("Interaction", IE_Pressed, this, &AFPSGun::AcquireController);
 				}
 			}
@@ -233,7 +242,7 @@ void AFPSGun::OnBeginOverLap(UPrimitiveComponent* OverlappedComponent, AActor* O
 				//在客户端绑定输入映射
 				if (CurCharacterController->InputComponent != nullptr)
 				{
-					UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,client"));
+					//UE_LOG(LogTemp, Error, TEXT("The current controller's inputcomponent is not null,client"));
 					CurCharacterController->InputComponent->BindAction("Interaction", IE_Pressed, this, &AFPSGun::AcquireController);
 				}
 			}

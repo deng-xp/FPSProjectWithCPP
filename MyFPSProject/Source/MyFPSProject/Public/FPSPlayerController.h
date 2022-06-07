@@ -21,6 +21,10 @@ public:
 	UPROPERTY()
 	class AFPSGun* HitGun;
 
+	//显示游戏结束的UI界面
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMissionAcomplished(bool IsAcomplished);
+
 	UFUNCTION(Server,Reliable)
 	void ChangePawn(APawn* HitGuna);
 	void ChangePawn_Implementation(APawn* HitGuna);

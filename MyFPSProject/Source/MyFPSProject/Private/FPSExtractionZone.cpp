@@ -39,11 +39,9 @@ void AFPSExtractionZone::NotifyActorBeginOverlap(AActor* OtherActor)
 	UE_LOG(LogTemp,Log,TEXT("Extraction Zone begin overlap"));
 	AMyFPSProjectGameMode* CurMode=Cast<AMyFPSProjectGameMode>(GetWorld()->GetAuthGameMode());
 	AMyFPSProjectCharacter* MyCharacter=Cast<AMyFPSProjectCharacter>(OtherActor);
-	if (MyCharacter)
+	if (CurMode&& MyCharacter)
 	{
 		CurMode->GameOver(MyCharacter);
-		//CurMode->MissionAcomplished();
 	}
-
 }
 

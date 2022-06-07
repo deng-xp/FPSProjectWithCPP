@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "MyFPSProjectGameMode.generated.h"
 
+
 class AMyFPSProjectCharacter;
 class AFPSGun;
 UCLASS(minimalapi)
@@ -27,8 +28,8 @@ public:
 	void GameOver(APawn* MyPawn);
 
 	//任务完成(此处用来显示游戏结束的UI界面)
-	UFUNCTION(BlueprintImplementableEvent)
-	void MissionAcomplished();
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void MissionAcomplished();
 
 	//用于表示输出那个UI界面
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

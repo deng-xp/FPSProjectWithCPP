@@ -7,6 +7,7 @@
 #include "EngineUtils.h"
 #include "kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "FPSGameStateBase.h"
 
 
 AMyFPSProjectGameMode::AMyFPSProjectGameMode()
@@ -20,6 +21,7 @@ AMyFPSProjectGameMode::AMyFPSProjectGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 	IsMissionAccomplished=true;
+	GameStateClass=AFPSGameStateBase::StaticClass();
 }
 
 void AMyFPSProjectGameMode::BeginPlay()
@@ -32,8 +34,13 @@ void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 	UE_LOG(LogTemp,Warning,TEXT("Game over"));
 	if (MyPawn)
 	{
-		//关闭输入
-		MyPawn->DisableInput(nullptr);
+		//关闭输入，并在各个客户端显示UI
+		//MyPawn->DisableInput(nullptr);
+		AFPSGameStateBase* GS=GetGameState<AFPSGameStateBase>();
+		if (GS)
+		{
+			GS->DisableInputofThePawn(MyPawn,IsMissionAccomplished);
+		}
 		if (ViewActorClass)
 		{
 			/*切换视角*/
@@ -44,10 +51,13 @@ void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 			if (ViewActor.Num() != 0)
 			{
 				AimViewActor = ViewActor[0];
-				APlayerController* MyController = Cast<APlayerController>(MyPawn->GetController());
-				if (MyController)
+				for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 				{
-					MyController->SetViewTargetWithBlend(AimViewActor, 1.0, EViewTargetBlendFunction::VTBlend_Cubic);
+					APlayerController* MyController = It->Get();
+					if (MyController)
+					{
+						MyController->SetViewTargetWithBlend(AimViewActor, 1.0, EViewTargetBlendFunction::VTBlend_Cubic);
+					}
 				}
 			}
 		}
@@ -55,7 +65,7 @@ void AMyFPSProjectGameMode::GameOver(APawn* MyPawn)
 		{
 			UE_LOG(LogTemp,Warning,TEXT("GameMode's ViewActorClass is nullptr!"));
 		}
-		MissionAcomplished();
+		//MissionAcomplished();
 	}
 }
 

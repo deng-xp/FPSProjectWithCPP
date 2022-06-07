@@ -22,6 +22,10 @@ ATestBox::ATestBox()
 	TextComponent=CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextComponent"));
 	TextComponent->SetupAttachment(CollisionBoxComponent);
 	TextComponent->SetVisibility(false);
+
+	TextComponent2 = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextComponent2"));
+	TextComponent2->SetupAttachment(CollisionBoxComponent);
+	TextComponent2->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -31,11 +35,24 @@ void ATestBox::BeginPlay()
 	CollisionBoxComponent->OnComponentBeginOverlap.AddDynamic(this,&ATestBox::OnBeginOverlap);
 }
 
+void ATestBox::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATestBox,testparam);
+}
+
 // Called every frame
 void ATestBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+//²âÊÔ±äÁ¿¸´ÖÆ
+void ATestBox::OnRep_testparam()
+{
+	TextComponent2->SetVisibility(true);
+}
+
 
 void ATestBox::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -43,6 +60,8 @@ void ATestBox::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	AMyFPSProjectCharacter* MyCharacter=Cast<AMyFPSProjectCharacter>(OtherActor);
 	if (MyCharacter)
 	{
+		testparam = true;
+		OnRep_testparam();
 		if (MyCharacter->GetLocalRole() == ROLE_Authority)
 		{
 			MyCharacter->OnBeginOverlapWithTestBox();
